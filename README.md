@@ -1,6 +1,12 @@
 # rotation-invariant-neural-networks
 
-Under construction, check back soon!
+This repository contains code for the paper:
+
+**Roxana Bujack, Emily Shinkle, Alice Allen, Tomas Suk, and Nicholas Lubbers**. *Flexible Moment-Invariant Bases from Irreducible Tensors*. arXiv preprint arXiv:2503.21939, 2025. [https://arxiv.org/abs/2503.21939](https://arxiv.org/abs/2503.21939)
+
+If you use this code in your research, please cite the paper:
+```bibtex @article{bujack2025flexible, title={Flexible Moment-Invariant Bases from Irreducible Tensors}, author={Bujack, Roxana and Shinkle, Emily and Allen, Alice and Suk, Tomas and Lubbers, Nicholas}, journal={arXiv preprint arXiv:2503.21939}, year={2025}, url={https://arxiv.org/abs/2503.21939}, doi={10.48550/arXiv.2503.21939} } ```
+
 
 Triad National Security, LLC (Triad) owns the copyright to rotation-invariant-neural-networks, which it identifies as project number O4827.
 
