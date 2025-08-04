@@ -1,7 +1,7 @@
 from hippynn.layers.hiplayers.polynomial_invariants import PolynomialInvariants
 import csv
 
-def flexible_polynomial_invariants(input_filename):
+def arbitrary_invariants_layer(input_filename):
     inf = open(input_filename, "r")
     reader = csv.reader(inf)
 
@@ -50,7 +50,6 @@ def flexible_polynomial_invariants(input_filename):
             final_contraction_representation.append(tuple(t))
         
         final_contractions.append(final_contraction_representation)
-        print(tensor_orders)
         
     offsets = {}
     next_offset = 0
