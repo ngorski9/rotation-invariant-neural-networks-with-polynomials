@@ -1,70 +1,47 @@
 from hippynn.layers.hiplayers.polynomial_invariants import PolynomialInvariants
 import csv
 
+# This function creates a layer that computes invariants that are specified in a text file.
+# This assumes that all of the tensors are represented in terms of basis coefficients relative to
+# the basis of irreducible tensors; see the documentation for polynomial_invariants.py in hippynn
+# for more clarification. The basis is assumed to be the one used in polynomial_invariants.py (cmaps),
+# which is defined in tensors.py.
+
+# This function reads in a file that specifies the invariants that will be used.
+# In the first line, you can declare the names of all of the tensors that you are going to use, separated by commas.
+# The names can be whatever you want. The tensors should be listed in the order that their basis
+# coefficients appear in the concatenated vector. For example, suppose that X = (x1, x2, ..., x9) represents
+# all of the basis coefficients for all of the tensors. Suppose that tensor1 is represented with x1, then
+# tensor2 is represented with x2, x3, x4. Then, finally, tensor3 is represented using x5-x9. Then the first
+# line of the input filename should be tensor1, tensor2, tensor3.
+
+# The remaining lines of the input filename should be the list of invariants specified using
+# the einsum style format that is documented in polynomial_invariants.py in hippynn.
+# see the documentation there for more details. In short, each invariant should be represented as a normal
+# einsum string, followed by the names of the tensors that you want to contract. The names should be some of the
+# same names that were written on the first line. Because all contractions should contract down to a scalar,
+# there should be no indices after the arrow. There should be a comma between the arrow and the first tensor
+# that you list.
+
+# Here is an example of what the file could look like:
+
+# tensor1, tensor2, tensor3
+# i,i->,tensor1,tensor1
+# i,ij,j->,tensor1,tensor2,tensor1
+# i,j,k,ijk->,tensor1,tensor1,tensor1,tensor3
+
 def arbitrary_invariants_layer(input_filename):
     inf = open(input_filename, "r")
-    reader = csv.reader(inf)
 
-    tensor_orders = {}
+    tensors = None
+    invariants = []
 
-    tensor_names = None
+    for line in inf:
+        if tensors is None:
+            tensors = line.split(",")
+            for i,t in enumerate(tensors):
+                tensors[i] = t.strip()
+        else:
+            invariants.append(line)
 
-    final_contractions = []
-
-    for line_number,line in enumerate(reader):
-        if tensor_names is None:
-            tensor_names = line
-            for i in range(len(tensor_names)):
-                tensor_names[i] = tensor_names[i].strip()
-            continue
-
-        contraction = []
-        num_tensors_contracted = len(line) // 2
-
-        indices = {}
-
-        contraction_tensors = []
-
-        for term in range(num_tensors_contracted):
-            for letter in line[term]:
-                if letter in indices:
-                    indices[letter].append(term)
-                else:
-                    indices[letter] = [term]
-
-            contraction_tensors.append( [line[term + num_tensors_contracted]] )
-                
-        for i in indices:
-            assert len(indices[i]) == 2, f"line {line_number}: the index letter {i} shows up in {len(indices[i])} terms. It should show up exactly two times."
-            contraction_tensors[indices[i][0]].append(indices[i][1])
-            contraction_tensors[indices[i][1]].append(indices[i][0])
-        
-        final_contraction_representation = []
-        for t in contraction_tensors:
-            order = len(t)-1
-            if t[0].strip() in tensor_orders:
-                assert order == tensor_orders[t[0]], f"tensor {t[0].strip()} has inconsistent orders, appearing as order {order} and {tensor_orders[t[0]]}"
-            else:
-                tensor_orders[t[0].strip()] = order
-            
-            final_contraction_representation.append(tuple(t))
-        
-        final_contractions.append(final_contraction_representation)
-        
-    offsets = {}
-    next_offset = 0
-    for tensor in tensor_names:
-        assert (tensor in tensor_orders), f"tensor {tensor} is declared but never used"
-
-        offsets[tensor] = next_offset
-
-        order = tensor_orders[tensor]
-        next_offset += 2*order+1
-
-    return PolynomialInvariants(float('inf'), float('inf'), possible_invars=final_contractions, input_offsets=offsets)
-
-        
-
-
-if __name__ == "__main__":
-    flexible_polynomial_invariants("generate_contractions.txt")
+    return PolynomialInvariants(float('inf'), float('inf'), invariants=invariants, input_tensor_ordering=tensors)
